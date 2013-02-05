@@ -27,7 +27,7 @@ class XmlTemplates
             <GN_ID>%{gnid}</GN_ID>
             <OPTION>
               <PARAMETER>SELECT_EXTENDED</PARAMETER>
-              <VALUE>COVER,ARTIST_IMAGE</VALUE>
+              <VALUE>ARTIST_IMAGE</VALUE>
             </OPTION>
           </QUERY>
         </QUERIES>
