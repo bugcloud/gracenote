@@ -31,11 +31,59 @@ EOF
       expect(client.client_id).to eq('test-id')
     end
 
-    it 'should set @user_id' do
-      stub_register_api
-      client = Gracenote.new('test-id')
-      uid = @register_api_response["RESPONSES"]["RESPONSE"]["USER"]
-      expect(client.user_id).to eq(uid)
+    context 'user_id is not given' do
+      it 'should set @user_id via REGISTER API' do
+        stub_register_api
+        client = Gracenote.new('test-id')
+        uid = @register_api_response["RESPONSES"]["RESPONSE"]["USER"]
+        expect(client.user_id).to eq(uid)
+      end
+    end
+
+    context 'user_id is given' do
+      it 'should set given @user_id' do
+        Gracenote.any_instance.should_not_receive(:post)
+        client = Gracenote.new('test-client-id', 'test-user-id')
+        expect(client.user_id).to eq('test-user-id')
+      end
+    end
+  end
+
+  describe 'Gracenote.basic_track_search' do
+    it 'should call Gracenote#post with correct XML' do
+      client = Gracenote.new('test-client-id', 'test-user-id')
+      xml =<<EOF
+<QUERIES>
+      <LANG>eng</LANG>
+      <AUTH>
+        <CLIENT>test-client-id</CLIENT>
+        <USER>test-user-id</USER>
+      </AUTH>
+      <QUERY CMD="ALBUM_SEARCH">
+        <TEXT TYPE="ARTIST">test_artist</TEXT>
+        <TEXT TYPE="ALBUM_TITLE">test_album</TEXT>
+        <TEXT TYPE="TRACK_TITLE">test_title</TEXT>
+      </QUERY>
+    </QUERIES>
+EOF
+      result_xml =<<EOF
+      <RESPONSES>
+        <RESPONSE STATUS="OK">
+          <ALBUM>
+            <GN_ID>TEST-GN-ID</GN_ID>
+          </ALBUM>
+        </RESPONSE>
+      </RESPONSES>
+EOF
+      result = {
+        "RESPONSES" => {
+          "RESPONSE" => {
+            "STATUS" => "OK",
+            "ALBUM" => {
+              "GN_ID" => "TEST-GN-ID" } } } }
+
+      client.should_receive(:post).with(xml.chomp).and_return result_xml
+      expect( client.basic_track_search('test_artist', 'test_album', 'test_title') ).to eq(result)
     end
   end
 end

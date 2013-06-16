@@ -6,20 +6,24 @@ require 'xml_templates'
 class Gracenote
   attr_accessor :user_id, :client_id
 
-  def initialize(client_id)
+  def initialize(client_id, user_id = nil)
     @client_id = client_id
-    xml = %Q|<QUERIES>
-         <QUERY CMD="REGISTER">
-           <CLIENT>#{@client_id}</CLIENT>
-         </QUERY>
-       </QUERIES>|
-   body = MultiXml.parse post(xml)
-   @user_id = body["RESPONSES"]["RESPONSE"]["USER"]
+    if user_id.nil?
+      xml = %Q|<QUERIES>
+           <QUERY CMD="REGISTER">
+             <CLIENT>#{@client_id}</CLIENT>
+           </QUERY>
+         </QUERIES>|
+      body = MultiXml.parse post(xml)
+      @user_id = body["RESPONSES"]["RESPONSE"]["USER"]
+    else
+      @user_id = user_id
+    end
   end
 
 
   def basic_track_search(artist, album_title, track_title)
-    xml = XmlTemplates.album_search  % {client_id: @client_id, user_id: @user_id, artist: artist, album_title: album_title, track_title: track_title}
+    xml = XmlTemplates.album_search % {client_id: @client_id, user_id: @user_id, artist: artist, album_title: album_title, track_title: track_title}
     response = MultiXml.parse post(xml)
     response
   end
