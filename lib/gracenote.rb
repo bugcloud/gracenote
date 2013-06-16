@@ -13,7 +13,7 @@ class Gracenote
            <CLIENT>#{@client_id}</CLIENT>
          </QUERY>
        </QUERIES>|
-   body = MultiXml.parse  post(xml)
+   body = MultiXml.parse post(xml)
    @user_id = body["RESPONSES"]["RESPONSE"]["USER"]
   end
 
@@ -33,7 +33,7 @@ class Gracenote
   private
 
   def uri
-    uri = URI.parse base_url
+    URI.parse base_url
   end
 
   def post xml
