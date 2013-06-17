@@ -32,4 +32,26 @@ class XmlTemplates
       </QUERY>
     </QUERIES>'
   end
+
+  def self.cover_search
+    '<QUERIES>
+      <AUTH>
+        <CLIENT>%{client_id}</CLIENT>
+        <USER>%{user_id}</USER>
+      </AUTH>
+      <LANG>eng</LANG>
+      <COUNTRY>usa</COUNTRY>
+      <QUERY CMD="ALBUM_SEARCH">
+        <MODE>SINGLE_BEST_COVER</MODE>
+        <TEXT TYPE="ARTIST">%{artist}</TEXT>
+        <TEXT TYPE="ALBUM_TITLE">%{album_title}</TEXT>
+        <OPTION>
+          <PARAMETER>COVER_SIZE</PARAMETER>
+          <VALUE>%{size}</VALUE>
+          <PARAMETER>FALLBACK_GENRECOVER</PARAMETER>
+          <VALUE>YES</VALUE>
+        </OPTION>
+      </QUERY>
+    </QUERIES>'
+  end
 end

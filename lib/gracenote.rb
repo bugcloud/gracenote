@@ -34,6 +34,18 @@ class Gracenote
     response['RESPONSES']['RESPONSE']['ALBUM']['URL']['__content__']
   end
 
+  #
+  # Search album cover art with artist name and album title.
+  # @param [Hash] Options
+  #   Options
+  #     :size => the size of cover art. the expected values are :large / :xlarge / :small / :medium / :thumbnail and the default value is :medium
+  def album_image(artist, album_title, *args)
+    options = args.last.is_a?(Hash) ? args.pop : { size: :medium }
+    xml = XmlTemplates.cover_search % {client_id: @client_id, user_id: @user_id, artist: artist, album_title: album_title, size: options[:size].to_s.upcase}
+    response = MultiXml.parse post(xml)
+    response['RESPONSES']['RESPONSE']['ALBUM']['URL']['__content__']
+  end
+
   private
 
   def uri
