@@ -122,4 +122,86 @@ EOF
       expect( client.artist_image('TEST-GN-ID') ).to eq(result)
     end
   end
+
+  describe 'Gracenote#album_image' do
+    context 'do not give image size' do
+      it 'should call Gracenote#post with correct XML' do
+        client = Gracenote.new('test-client-id', 'test-user-id')
+        xml =<<EOF
+<QUERIES>
+      <AUTH>
+        <CLIENT>test-client-id</CLIENT>
+        <USER>test-user-id</USER>
+      </AUTH>
+      <LANG>eng</LANG>
+      <COUNTRY>usa</COUNTRY>
+      <QUERY CMD="ALBUM_SEARCH">
+        <MODE>SINGLE_BEST_COVER</MODE>
+        <TEXT TYPE="ARTIST">test-artist</TEXT>
+        <TEXT TYPE="ALBUM_TITLE">test-album-title</TEXT>
+        <OPTION>
+          <PARAMETER>COVER_SIZE</PARAMETER>
+          <VALUE>MEDIUM</VALUE>
+          <PARAMETER>FALLBACK_GENRECOVER</PARAMETER>
+          <VALUE>YES</VALUE>
+        </OPTION>
+      </QUERY>
+    </QUERIES>
+EOF
+        result_xml =<<EOF
+      <RESPONSES>
+        <RESPONSE STATUS="OK">
+          <ALBUM>
+            <GN_ID>TEST-GN-ID</GN_ID>
+            <URL TYPE="COVERART" SIZE="MEDIUM">http://te.st/test.jpg</URL>
+          </ALBUM>
+        </RESPONSE>
+      </RESPONSES>
+EOF
+        result = "http://te.st/test.jpg"
+        client.should_receive(:post).with(xml.chomp).and_return result_xml
+        expect( client.album_image('test-artist', 'test-album-title') ).to eq(result)
+      end
+    end
+
+    context 'give image size' do
+      it 'should call Gracenote#post with correct XML' do
+        client = Gracenote.new('test-client-id', 'test-user-id')
+        xml =<<EOF
+<QUERIES>
+      <AUTH>
+        <CLIENT>test-client-id</CLIENT>
+        <USER>test-user-id</USER>
+      </AUTH>
+      <LANG>eng</LANG>
+      <COUNTRY>usa</COUNTRY>
+      <QUERY CMD="ALBUM_SEARCH">
+        <MODE>SINGLE_BEST_COVER</MODE>
+        <TEXT TYPE="ARTIST">test-artist</TEXT>
+        <TEXT TYPE="ALBUM_TITLE">test-album-title</TEXT>
+        <OPTION>
+          <PARAMETER>COVER_SIZE</PARAMETER>
+          <VALUE>LARGE</VALUE>
+          <PARAMETER>FALLBACK_GENRECOVER</PARAMETER>
+          <VALUE>YES</VALUE>
+        </OPTION>
+      </QUERY>
+    </QUERIES>
+EOF
+        result_xml =<<EOF
+      <RESPONSES>
+        <RESPONSE STATUS="OK">
+          <ALBUM>
+            <GN_ID>TEST-GN-ID</GN_ID>
+            <URL TYPE="COVERART" SIZE="LARGE">http://te.st/test.jpg</URL>
+          </ALBUM>
+        </RESPONSE>
+      </RESPONSES>
+EOF
+        result = "http://te.st/test.jpg"
+        client.should_receive(:post).with(xml.chomp).and_return result_xml
+        expect( client.album_image('test-artist', 'test-album-title', size: :large) ).to eq(result)
+      end
+    end
+  end
 end
