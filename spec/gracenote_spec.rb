@@ -86,4 +86,40 @@ EOF
       expect( client.basic_track_search('test_artist', 'test_album', 'test_title') ).to eq(result)
     end
   end
+
+  describe 'Gracenote.artist_image' do
+    it 'should call Gracenote#post with correct XML' do
+      client = Gracenote.new('test-client-id', 'test-user-id')
+      xml =<<EOF
+<QUERIES>
+      <AUTH>
+        <CLIENT>test-client-id</CLIENT>
+        <USER>test-user-id</USER>
+      </AUTH>
+      <LANG>eng</LANG>
+      <COUNTRY>usa</COUNTRY>
+      <QUERY CMD="ALBUM_FETCH">
+        <GN_ID>TEST-GN-ID</GN_ID>
+        <OPTION>
+          <PARAMETER>SELECT_EXTENDED</PARAMETER>
+          <VALUE>ARTIST_IMAGE</VALUE>
+        </OPTION>
+      </QUERY>
+    </QUERIES>
+EOF
+      result_xml =<<EOF
+      <RESPONSES>
+        <RESPONSE STATUS="OK">
+          <ALBUM>
+            <GN_ID>TEST-GN-ID</GN_ID>
+            <URL TYPE="ARTIST_IMAGE">http://te.st/test.jpg</URL>
+          </ALBUM>
+        </RESPONSE>
+      </RESPONSES>
+EOF
+      result = "http://te.st/test.jpg"
+      client.should_receive(:post).with(xml.chomp).and_return result_xml
+      expect( client.artist_image('TEST-GN-ID') ).to eq(result)
+    end
+  end
 end
