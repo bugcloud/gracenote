@@ -12,7 +12,7 @@ Functionality so far:
 
 Add this line to your application's Gemfile:
 
-    gem 'gracenote', :git=> 'git://github.com/gouthamvel/gracenote.git'
+    gem 'gracenote'
 
 And then execute:
 
