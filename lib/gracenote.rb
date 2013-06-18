@@ -31,7 +31,11 @@ class Gracenote
   def artist_image(gnid)
     xml = XmlTemplates.album_fetch % {client_id: @client_id, user_id: @user_id, gnid: gnid}
     response = MultiXml.parse post(xml)
-    response['RESPONSES']['RESPONSE']['ALBUM']['URL']['__content__']
+    begin
+      response['RESPONSES']['RESPONSE']['ALBUM']['URL']['__content__']
+    rescue NoMethodError
+      nil
+    end
   end
 
   #
@@ -43,7 +47,11 @@ class Gracenote
     options = args.last.is_a?(Hash) ? args.pop : { size: :medium }
     xml = XmlTemplates.cover_search % {client_id: @client_id, user_id: @user_id, artist: artist, album_title: album_title, size: options[:size].to_s.upcase}
     response = MultiXml.parse post(xml)
-    response['RESPONSES']['RESPONSE']['ALBUM']['URL']['__content__']
+    begin
+      response['RESPONSES']['RESPONSE']['ALBUM']['URL']['__content__']
+    rescue NoMethodError
+      nil
+    end
   end
 
   private

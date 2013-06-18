@@ -50,9 +50,10 @@ EOF
   end
 
   describe 'Gracenote#basic_track_search' do
-    it 'should call Gracenote#post with correct XML' do
-      client = Gracenote.new('test-client-id', 'test-user-id')
-      xml =<<EOF
+    context 'there are some search results' do
+      it 'should call Gracenote#post with correct XML' do
+        client = Gracenote.new('test-client-id', 'test-user-id')
+        xml =<<EOF
 <QUERIES>
       <LANG>eng</LANG>
       <AUTH>
@@ -66,7 +67,7 @@ EOF
       </QUERY>
     </QUERIES>
 EOF
-      result_xml =<<EOF
+        result_xml =<<EOF
       <RESPONSES>
         <RESPONSE STATUS="OK">
           <ALBUM>
@@ -75,22 +76,56 @@ EOF
         </RESPONSE>
       </RESPONSES>
 EOF
-      result = {
-        "RESPONSES" => {
-          "RESPONSE" => {
-            "STATUS" => "OK",
-            "ALBUM" => {
-              "GN_ID" => "TEST-GN-ID" } } } }
+        result = {
+          "RESPONSES" => {
+            "RESPONSE" => {
+              "STATUS" => "OK",
+              "ALBUM" => {
+                "GN_ID" => "TEST-GN-ID" } } } }
 
-      client.should_receive(:post).with(xml.chomp).and_return result_xml
-      expect( client.basic_track_search('test_artist', 'test_album', 'test_title') ).to eq(result)
+        client.should_receive(:post).with(xml.chomp).and_return result_xml
+        expect( client.basic_track_search('test_artist', 'test_album', 'test_title') ).to eq(result)
+      end
+    end
+
+    context 'there is no search result' do
+      it 'should call Gracenote#post with correct XML' do
+        client = Gracenote.new('test-client-id', 'test-user-id')
+        xml =<<EOF
+<QUERIES>
+      <LANG>eng</LANG>
+      <AUTH>
+        <CLIENT>test-client-id</CLIENT>
+        <USER>test-user-id</USER>
+      </AUTH>
+      <QUERY CMD="ALBUM_SEARCH">
+        <TEXT TYPE="ARTIST">test_artist</TEXT>
+        <TEXT TYPE="ALBUM_TITLE">test_album</TEXT>
+        <TEXT TYPE="TRACK_TITLE">test_title</TEXT>
+      </QUERY>
+    </QUERIES>
+EOF
+        result_xml =<<EOF
+      <RESPONSES>
+        <RESPONSE STATUS="NO_MATCH"></RESPONSE>
+      </RESPONSES>
+EOF
+        result = {
+          "RESPONSES" => {
+            "RESPONSE" => {
+              "STATUS" => "NO_MATCH" } } }
+
+        client.should_receive(:post).with(xml.chomp).and_return result_xml
+        expect( client.basic_track_search('test_artist', 'test_album', 'test_title') ).to eq(result)
+      end
     end
   end
 
   describe 'Gracenote#artist_image' do
-    it 'should call Gracenote#post with correct XML' do
-      client = Gracenote.new('test-client-id', 'test-user-id')
-      xml =<<EOF
+    context 'there are some search results' do
+      it 'should call Gracenote#post with correct XML' do
+        client = Gracenote.new('test-client-id', 'test-user-id')
+        xml =<<EOF
 <QUERIES>
       <AUTH>
         <CLIENT>test-client-id</CLIENT>
@@ -107,7 +142,7 @@ EOF
       </QUERY>
     </QUERIES>
 EOF
-      result_xml =<<EOF
+        result_xml =<<EOF
       <RESPONSES>
         <RESPONSE STATUS="OK">
           <ALBUM>
@@ -117,9 +152,40 @@ EOF
         </RESPONSE>
       </RESPONSES>
 EOF
-      result = "http://te.st/test.jpg"
-      client.should_receive(:post).with(xml.chomp).and_return result_xml
-      expect( client.artist_image('TEST-GN-ID') ).to eq(result)
+        result = "http://te.st/test.jpg"
+        client.should_receive(:post).with(xml.chomp).and_return result_xml
+        expect( client.artist_image('TEST-GN-ID') ).to eq(result)
+      end
+    end
+
+    context 'there is no search result' do
+      it 'should call Gracenote#post with correct XML' do
+        client = Gracenote.new('test-client-id', 'test-user-id')
+        xml =<<EOF
+<QUERIES>
+      <AUTH>
+        <CLIENT>test-client-id</CLIENT>
+        <USER>test-user-id</USER>
+      </AUTH>
+      <LANG>eng</LANG>
+      <COUNTRY>usa</COUNTRY>
+      <QUERY CMD="ALBUM_FETCH">
+        <GN_ID>TEST-GN-ID</GN_ID>
+        <OPTION>
+          <PARAMETER>SELECT_EXTENDED</PARAMETER>
+          <VALUE>ARTIST_IMAGE</VALUE>
+        </OPTION>
+      </QUERY>
+    </QUERIES>
+EOF
+        result_xml =<<EOF
+      <RESPONSES>
+        <RESPONSE STATUS="NO_MATCH"></RESPONSE>
+      </RESPONSES>
+EOF
+        client.should_receive(:post).with(xml.chomp).and_return result_xml
+        expect( client.artist_image('TEST-GN-ID') ).to be_nil
+      end
     end
   end
 
@@ -201,6 +267,40 @@ EOF
         result = "http://te.st/test.jpg"
         client.should_receive(:post).with(xml.chomp).and_return result_xml
         expect( client.album_image('test-artist', 'test-album-title', size: :large) ).to eq(result)
+      end
+    end
+
+    context 'there is no search result' do
+      it 'should call Gracenote#post with correct XML' do
+        client = Gracenote.new('test-client-id', 'test-user-id')
+        xml =<<EOF
+<QUERIES>
+      <AUTH>
+        <CLIENT>test-client-id</CLIENT>
+        <USER>test-user-id</USER>
+      </AUTH>
+      <LANG>eng</LANG>
+      <COUNTRY>usa</COUNTRY>
+      <QUERY CMD="ALBUM_SEARCH">
+        <MODE>SINGLE_BEST_COVER</MODE>
+        <TEXT TYPE="ARTIST">test-artist</TEXT>
+        <TEXT TYPE="ALBUM_TITLE">test-album-title</TEXT>
+        <OPTION>
+          <PARAMETER>COVER_SIZE</PARAMETER>
+          <VALUE>LARGE</VALUE>
+          <PARAMETER>FALLBACK_GENRECOVER</PARAMETER>
+          <VALUE>YES</VALUE>
+        </OPTION>
+      </QUERY>
+    </QUERIES>
+EOF
+        result_xml =<<EOF
+      <RESPONSES>
+        <RESPONSE STATUS="NO_MATCH"></RESPONSE>
+      </RESPONSES>
+EOF
+        client.should_receive(:post).with(xml.chomp).and_return result_xml
+        expect( client.album_image('test-artist', 'test-album-title', size: :large) ).to be_nil
       end
     end
   end
